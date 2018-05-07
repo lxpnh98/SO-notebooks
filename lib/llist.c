@@ -25,6 +25,15 @@ void llist_add(LLIST l, void *d) {
     l->head = new_node;
 }
 
+void llist_add_unique(LLIST l, void *d, int (*cmp)(void *, void *)) {
+    assert(l); assert(cmp);
+    struct node *x;
+    for (x = l->head; x != NULL; x = x->next) {
+        if (cmp(x->data, d) == 0) break;
+    }
+    if (x == NULL) llist_add(l, d);
+}
+
 void *llist_get_data(LLIST l) {
     assert(l);
     return (l->head ? l->head->data : NULL);

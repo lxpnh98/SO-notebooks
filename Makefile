@@ -2,6 +2,8 @@ SHELL=/bin/bash
 PROGNAME=main
 CC=gcc
 CFLAGS=-Wall -Wextra -pedantic -std=c11 -ggdb
+# disable asserts
+#CFLAGS=-Wall -Wextra -pedantic -std=c11 -ggdb -DNDEBUG
 
 $(PROGNAME): main.c $(patsubst lib/%.c, obj/%.o, $(wildcard lib/*.c))
 	$(CC) -o $@ $^ -Iinclude $(CFLAGS)
@@ -21,5 +23,5 @@ clean:
 	rm main obj/*.o
 
 clean_tests:
-	rm obj/*.o
 	rm tests/bin/*
+	rm obj/*.o

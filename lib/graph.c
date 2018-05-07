@@ -24,13 +24,27 @@ GRAPH graph_create(int nnodes) {
     return new;
 }
 
+int cmp_int(void *px, void *py) {
+    assert(px); assert(py);
+    int x = *(int *)px;
+    int y = *(int *)py;
+    if (x <  y) return -1;
+    if (x == y) return  0;
+    else        return  1;
+}
+
 void graph_add_edge(GRAPH g, int o, int d) {
     assert(g);
     assert(o >= 0); assert(d >= 0);
     assert(o < g->nnodes); assert(d < g->nnodes);
     int *dest = malloc(sizeof(int));
     *dest = d;
-    llist_add(g->nodes[o]->adj, dest);
+    llist_add_unique(g->nodes[o]->adj, dest, cmp_int);
+}
+
+LLIST graph_get_adj(GRAPH g, int n) {
+    assert(g); assert(n < g->nnodes);
+    return g->nodes[n]->adj;
 }
 
 void graph_node_free(struct node *n) {

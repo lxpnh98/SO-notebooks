@@ -7,6 +7,8 @@ LLIST llist_create(void);
 
 void llist_add(LLIST l, void *d);
 
+void llist_add_unique(LLIST l, void *d, int (*cmp)(void *, void *));
+
 void *llist_get_data(LLIST l);
 
 void llist_next(LLIST l);
