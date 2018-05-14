@@ -28,7 +28,14 @@ void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write) {
                 if (file_buf[i] == '>') {
                     if (++begin_output_marks == 3) {
                         output = 1;
+                        // adicionar bloco e preparar seguinte
                         j -= 2; // apagar marcas anteriores
+                        struct block *b = malloc(sizeof(struct block));
+                        b->size = j;
+                        b->buf = to_write;
+                        llist_add_tail(l, b);
+                        to_write = malloc(sizeof(char *) * nbytes);
+                        j = 0;
                     }
                 } else {
                     begin_output_marks = 0;
