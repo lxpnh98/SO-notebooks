@@ -10,9 +10,8 @@ struct block {
 };
 
 struct cmd {
-    char *cmd;
-    char **argv;
-    LLIST outputs;
+    LLIST args;
+    int input_from;
 };
 
 void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write);

@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 
@@ -75,8 +76,7 @@ void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write) {
                 // fazer parsing do comando
                 struct cmd *comando = malloc(sizeof(struct cmd));
                 parse_cmd(cmd_buf, comando);
-                write(1, cmd_buf, k);
-                write(1, "\n", 1);
+                printf("%d\n", comando->input_from);
             }
 
             if (cmd == 1) {
@@ -95,5 +95,28 @@ void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write) {
 }
 
 void parse_cmd(char *buf, struct cmd *c) {
+    buf++; // ignorar '$' inicial
+    // detetar se tem redirecionamento de input
+    char *pipe = strchr(buf, '|');
+    int input_from = 0;
+    if (pipe) {
+        // determinar qual o input
+        char *tmp = buf;
+        buf = pipe + 1;
+        *pipe = '\0';
+        if (sscanf(tmp, "%d", &input_from) != 1) {
+            input_from = 1;
+        }
+        c->input_from = input_from;
+    }
+    // construir lista de argumentos
+    LLIST tokens = llist_create();
+    char *token = strtok(buf, " ");
+    while (token) {
+        llist_add_tail(tokens, token);
+        token = strtok(NULL, " ");
+    }
+    llist_add_tail(tokens, NULL); // terminar a lista de argumentos
+    c->args = tokens;
 }
 
