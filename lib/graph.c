@@ -15,7 +15,7 @@ struct node {
 GRAPH graph_create(int nnodes) {
     assert(nnodes >= 0);
     GRAPH new = malloc(sizeof(struct graph));
-    new->nodes = malloc(sizeof(struct node *) * nnodes);
+    new->nodes = (nnodes > 0 ? malloc(sizeof(struct node *) * nnodes) : NULL);
     new->nnodes = nnodes;
     for (int i = 0; i < nnodes; i++) {
         new->nodes[i] = malloc(sizeof(struct node));

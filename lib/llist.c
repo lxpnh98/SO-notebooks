@@ -4,6 +4,7 @@
 
 struct llist {
     struct node *head;
+    struct node *tail;
 };
 
 struct node {
@@ -14,6 +15,7 @@ struct node {
 LLIST llist_create(void) {
     LLIST new = malloc(sizeof(struct llist));
     new->head = NULL;
+    new->tail = NULL;
     return new;
 }
 
@@ -23,6 +25,19 @@ void llist_add(LLIST l, void *d) {
     new_node->data = d;
     new_node->next = l->head;
     l->head = new_node;
+    if (l->tail == NULL) l->tail = l->head;
+}
+
+void llist_add_tail(LLIST l, void *d) {
+    assert(l);
+    if (l->tail == NULL) llist_add(l, d);
+    else {
+        struct node *new_node = malloc(sizeof(struct node));
+        new_node->data = d;
+        new_node->next = NULL;
+        l->tail->next = new_node;
+        l->tail = new_node;
+    }
 }
 
 void llist_add_unique(LLIST l, void *d, int (*cmp)(void *, void *)) {
@@ -43,12 +58,14 @@ void llist_next(LLIST l) {
     assert(l);
     assert(l->head);
     l->head = l->head->next;
+    if (l->head == NULL) l->tail = NULL;
 }
 
 LLIST llist_clone(LLIST l) {
     assert(l);
     LLIST new = malloc(sizeof(struct llist));
     new->head = l->head;
+    new->tail = l->tail;
     return new;
 }
 

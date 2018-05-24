@@ -2,9 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <fcntl.h>
 
 #include "common.h"
+#include "graph.h"
 #include "llist.h"
+#include "parser.h"
 
 
 int main(int argc, char *argv[]) {
@@ -16,7 +19,18 @@ int main(int argc, char *argv[]) {
         write(2, "\n", 1);
         exit(1);
     }
-    LLIST l = llist_create();
-    assert(0);
+    LLIST l;
+    GRAPH g;
+    int fd = open(argv[1], O_RDONLY);
+
+    parse_file(fd, &g, &l);
+
+    struct block *b;
+    LLIST x = llist_clone(l);
+    while ((b = (struct block *)llist_get_data(x))) {
+        write(1, b->buf, b->size);
+        llist_next(x);
+    }
+
     exit(0);
 }
