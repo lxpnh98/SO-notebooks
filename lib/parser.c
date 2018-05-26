@@ -13,6 +13,8 @@
 
 void parse_cmd(char *buf, struct cmd *c);
 
+void add_cmd_to_graph(GRAPH g, struct cmd *comando);
+
 void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write) {
     GRAPH g = graph_create(0);
     LLIST l = llist_create();
@@ -76,6 +78,7 @@ void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write) {
                 // fazer parsing do comando
                 struct cmd *comando = malloc(sizeof(struct cmd));
                 parse_cmd(cmd_buf, comando);
+                add_cmd_to_graph(g, comando);
                 printf("%d\n", comando->input_from);
             }
 
@@ -120,3 +123,10 @@ void parse_cmd(char *buf, struct cmd *c) {
     c->args = tokens;
 }
 
+void add_cmd_to_graph(GRAPH g, struct cmd *comando) {
+    int new_node = graph_get_nnodes(g);
+    graph_set_nnodes(g, new_node + 1);
+    if (comando->input_from != 0) {
+        graph_add_edge(g, new_node - comando->input_from, new_node);
+    }
+}

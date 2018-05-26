@@ -26,5 +26,5 @@ int main(void) {
         }
         printf("\n");
     }
-    graph_free(g);
+    graph_free(g, NULL);
 }
