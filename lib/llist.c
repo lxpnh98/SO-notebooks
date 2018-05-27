@@ -84,3 +84,21 @@ void llist_free(LLIST l, void (*f)(void *)) {
     llist_node_free(l->head, f);
     free(l);
 }
+
+void llist_to_array(LLIST l, char *array[]) {
+    int i = 0;
+    while(l) {
+        array[i] = (char*)llist_get_data(l);
+        llist_next(l);
+        i++;
+    }
+}
+
+int llist_length(LLIST l) {
+    int length = 0;
+    while(l) {
+        llist_next(l);
+        length++;
+    }
+    return length;
+}
