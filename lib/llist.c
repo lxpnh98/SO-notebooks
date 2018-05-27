@@ -69,6 +69,26 @@ LLIST llist_clone(LLIST l) {
     return new;
 }
 
+void **llist_to_array(LLIST l) {
+    int len = llist_length(l);
+    void **a = malloc(sizeof(void *) * len);
+    struct node *h;
+    int i;
+    for (i = 0, h = l->head; h; i++, h = h->next) {
+        a[i] = h->data;
+    }
+    return a;
+}
+
+int llist_length(LLIST l) {
+    int length = 0;
+    struct node *h;
+    for (h = l->head; h; h = h->next) {
+        length++;
+    }
+    return length;
+}
+
 void llist_node_free(struct node *node, void (*f)(void *)) {
     if (node) {
         llist_node_free(node->next, f);
@@ -85,20 +105,3 @@ void llist_free(LLIST l, void (*f)(void *)) {
     free(l);
 }
 
-void llist_to_array(LLIST l, char *array[]) {
-    int i = 0;
-    while(l) {
-        array[i] = (char*)llist_get_data(l);
-        llist_next(l);
-        i++;
-    }
-}
-
-int llist_length(LLIST l) {
-    int length = 0;
-    while(l) {
-        llist_next(l);
-        length++;
-    }
-    return length;
-}

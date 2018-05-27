@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "common.h"
 #include "graph.h"
 #include "llist.h"
 #include "parser.h"
@@ -79,7 +80,6 @@ void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write) {
                 struct cmd *comando = malloc(sizeof(struct cmd));
                 parse_cmd(cmd_buf, comando);
                 add_cmd_to_graph(g, comando);
-                printf("%d\n", comando->input_from);
             }
 
             if (cmd == 1) {
@@ -116,7 +116,7 @@ void parse_cmd(char *buf, struct cmd *c) {
     LLIST tokens = llist_create();
     char *token = strtok(buf, " ");
     while (token) {
-        llist_add_tail(tokens, token);
+        llist_add_tail(tokens, mystrdup(token));
         token = strtok(NULL, " ");
     }
     llist_add_tail(tokens, NULL); // terminar a lista de argumentos
@@ -129,4 +129,5 @@ void add_cmd_to_graph(GRAPH g, struct cmd *comando) {
     if (comando->input_from != 0) {
         graph_add_edge(g, new_node - comando->input_from, new_node);
     }
+    graph_set_data(g, new_node, comando);
 }

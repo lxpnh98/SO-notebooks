@@ -15,12 +15,12 @@ void *llist_get_data(LLIST l);
 
 void llist_next(LLIST l);
 
+void **llist_to_array(LLIST l);
+
+int llist_length(LLIST l);
+
 LLIST llist_clone(LLIST l);
 
 void llist_free(LLIST l, void (*f)(void *));
-
-void llist_to_array(LLIST l, char *array[]);
-
-int llist_length(LLIST); 
 
 #endif

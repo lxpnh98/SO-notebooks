@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <fcntl.h>
@@ -10,6 +11,7 @@
 #include "llist.h"
 #include "parser.h"
 
+void cria_processos(GRAPH g);
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -26,6 +28,8 @@ int main(int argc, char *argv[]) {
 
     parse_file(fd, &g, &l);
 
+    cria_processos(g);
+
     struct block *b;
     LLIST x = llist_clone(l);
     while ((b = (struct block *)llist_get_data(x))) {
@@ -37,26 +41,27 @@ int main(int argc, char *argv[]) {
 }
 
 void cria_processos(GRAPH g) {
-	int i;
-	int tam = graph_get_nnodes(g);
-	pid_t pid;
+    int tam = graph_get_nnodes(g);
+    pid_t pid;
 
-	for(i = 0; i < tam; i++) {
-		LLIST adj = graph_get_adj(g, i);
-		int *j;
-		while ( (j = (int *)(llist_get_data(adj))) ) {
-			if((pid = fork()) < 0) {
-				exit(1);
-			}
-			if (pid == 0) {
-				int length = llist_length(adj);
-				char *arg[length];
-				llist_to_array(adj, arg);
-				execvp(arg[0], arg);
-			} else {
-				wait(NULL);
-			}
-			llist_next(adj);
-		}
-	}
+    for(int i = 0; i < tam; i++) {
+        /*
+        LLIST adj = graph_get_adj(g, i);
+        int *j;
+        while ( (j = (int *)(llist_get_data(adj))) ) {
+            llist_next(adj);
+        }
+        */
+        if((pid = fork()) < 0) {
+            exit(1);
+        }
+        if (pid == 0) {
+            LLIST arg_list = ((struct cmd *)graph_get_data(g, i))->args;
+            char **argv = (char **)llist_to_array(arg_list);
+            execvp(argv[0], argv);
+            exit(1); // em caso de erro
+        } else {
+            wait(NULL);
+        }
+    }
 }
