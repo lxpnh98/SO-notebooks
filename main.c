@@ -15,6 +15,7 @@
 void make_input_fifos(GRAPH g);
 void make_output_fifos(GRAPH g);
 void execute_graph(GRAPH g);
+void write_to_file(LLIST l, int fd);
 
 void print_outputs(GRAPH g) {
     int tam = graph_get_nnodes(g);
@@ -34,6 +35,7 @@ void print_outputs(GRAPH g) {
 }
 
 int main(int argc, char *argv[]) {
+    char output_path[64];
     if (argc < 2) {
         char e[] = "Missing argument.";
         write(2, argv[0], strlen(argv[0]));
@@ -51,13 +53,10 @@ int main(int argc, char *argv[]) {
     make_output_fifos(g);
     execute_graph(g);
     print_outputs(g);
+    sprintf(output_path, "%s_o", argv[1]);
+    int output_fd = open(output_path, O_CREAT | O_WRONLY, 0644);
+    write_to_file(l, output_fd);
 
-    struct block *b;
-    LLIST x = llist_clone(l);
-    while ((b = (struct block *)llist_get_data(x))) {
-        write(1, b->buf, b->size);
-        llist_next(x);
-    }
     exit(0);
 }
 
@@ -155,6 +154,15 @@ void execute_distribuidor(GRAPH g, int i, int pipe[]) {
         execvp(argv[0], argv);
         fprintf(stderr, "Erro ao executar distribuidor.\n");
         exit(1); // em caso de erro
+    }
+}
+
+void write_to_file(LLIST l, int fd) {
+    struct block *b;
+    LLIST x = llist_clone(l);
+    while ((b = (struct block *)llist_get_data(x))) {
+        write(fd, b->buf, b->size);
+        llist_next(x);
     }
 }
 

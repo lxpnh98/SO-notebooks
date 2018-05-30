@@ -5,6 +5,8 @@ CFLAGS=-Wall -Wextra -pedantic -std=c11 -ggdb
 # disable asserts
 #CFLAGS=-Wall -Wextra -pedantic -std=c11 -ggdb -DNDEBUG
 
+all: distribuidor $(PROGNAME)
+
 $(PROGNAME): main.c $(patsubst lib/%.c, obj/%.o, $(wildcard lib/*.c))
 	$(CC) -o $@ $^ -Iinclude $(CFLAGS)
 
@@ -17,19 +19,7 @@ test/bin/%: test/%.c $(patsubst lib/%.c, obj/%.o, $(wildcard lib/*.c))
 	$(CC) -o $@ $^ -Iinclude $(CFLAGS)
 
 
-.PHONY: cleanall
 .PHONY: clean
-.PHONY: clean_obj
-.PHONY: clean_test
-
-cleanall: clean clean_test clean_obj
 
 clean:
-	rm main
-
-clean_test:
-	rm test/bin/*
-
-clean_obj:
-	rm obj/*.o
-
+	rm main distribuidor i* o* test/bin/* obj/*.o 2> /dev/null || true # ignorar erros
