@@ -67,7 +67,7 @@ void make_input_fifos(GRAPH g) {
     for(int i = 0; i < tam; i++) {
         if (((struct cmd *)graph_get_data(g, i))->input_from > 0) {
             sprintf(path, "i%d", i);
-            fprintf(stderr, "Criou fifo i%d\n", i);
+            fprintf(stderr, "Criou fifo %s\n", path);
             mkfifo(path, 0600);
         }
     }
@@ -78,7 +78,7 @@ void make_output_fifos(GRAPH g) {
     char path[10];
     for(int i = 0; i < tam; i++) {
         sprintf(path, "o%d", i);
-        fprintf(stderr, "Criou fifo o%d\n", i);
+        fprintf(stderr, "Criou fifo %s\n", path);
         mkfifo(path, 0600);
     }
 }
@@ -94,20 +94,20 @@ void execute_graph(GRAPH g) {
 
     for(int i = 0; i < tam; i++) {
 
-        sprintf(path, "i%d", i);
-        // abrir e redirecionar fifo de input
-        if (((struct cmd *)graph_get_data(g, i))->input_from > 0) {
-            input_fd = open(path, O_RDONLY);
-            fprintf(stderr, "Abriu fifo '%s'.\n", path);
-            dup2(input_fd, 0);
-        }
-
         // redirecionar output e distribuir
         pipe(output_pipe);
         execute_distribuidor(g, i, output_pipe);
 
         // executar comando
         if((pid = fork()) == 0) {
+            // abrir e redirecionar fifo de input
+            if (((struct cmd *)graph_get_data(g, i))->input_from > 0) {
+                sprintf(path, "i%d", i);
+                input_fd = open(path, O_RDONLY); // (*)
+                fprintf(stderr, "Abriu fifo '%s'.\n", path);
+                dup2(input_fd, 0);
+            }
+
             close(output_pipe[0]);
             dup2(output_pipe[1], 1);
             LLIST arg_list = ((struct cmd *)graph_get_data(g, i))->args;
@@ -116,8 +116,7 @@ void execute_graph(GRAPH g) {
             execvp(argv[0], argv);
             exit(1); // em caso de erro
         } else {
-            close(output_pipe[1]);
-            wait(NULL);
+            //wait(NULL); // se o programa que dá o input acabar primeiro que o que recebe, não funciona (hangs ao abrir o fifo para escrever (*) )
             close(output_pipe[1]);
         }
     }
@@ -132,7 +131,7 @@ void execute_distribuidor(GRAPH g, int i, int pipe[]) {
 
     // ficheiro de output para escrever no ficheiro resultado
     sprintf(path, "o%d", i);
-    llist_add_tail(arg_list, path);
+    llist_add_tail(arg_list, mystrdup(path));
 
     // adicionar fifos em que escrever
     LLIST adj = llist_clone(graph_get_adj(g, i));
@@ -150,7 +149,9 @@ void execute_distribuidor(GRAPH g, int i, int pipe[]) {
     if (fork() == 0) {
         close(pipe[1]);
         dup2(pipe[0], 0);
+        fprintf(stderr, "A executar distribuidor %d.\n", i);
         execvp(argv[0], argv);
+        fprintf(stderr, "Erro ao executar distribuidor.\n");
         exit(1); // em caso de erro
     }
 }
