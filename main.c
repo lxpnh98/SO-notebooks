@@ -118,6 +118,7 @@ void execute_graph(GRAPH g) {
         } else {
             close(output_pipe[1]);
             wait(NULL);
+            close(output_pipe[1]);
         }
     }
 }
