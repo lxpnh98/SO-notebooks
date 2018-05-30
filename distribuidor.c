@@ -19,9 +19,6 @@ int main(int argc, char const *argv[]) {
             write(files[i], buffer, nbytes);
         }
     }
-
-    // fazer esperar por sinal para fechar ficheiros (?)
-
     for (int i = 0; i < argc - 1; i++) {
         close(files[i]);
     }

@@ -116,7 +116,9 @@ void execute_graph(GRAPH g) {
             execvp(argv[0], argv);
             exit(1); // em caso de erro
         } else {
-            //wait(NULL); // se o programa que dá o input acabar primeiro que o que recebe, não funciona (hangs ao abrir o fifo para escrever (*) )
+            if (((struct cmd *)graph_get_data(g, i))->input_from > 0) {
+                wait(NULL); // se o programa que dá o input acabar primeiro que o que recebe, não funciona (hangs ao abrir o fifo para escrever (*) )
+            }
             close(output_pipe[1]);
         }
     }
