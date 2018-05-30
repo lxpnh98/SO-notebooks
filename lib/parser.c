@@ -80,6 +80,7 @@ void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write) {
                 struct cmd *comando = malloc(sizeof(struct cmd));
                 parse_cmd(cmd_buf, comando);
                 add_cmd_to_graph(g, comando);
+                comando->output_to = llist_length(l);
             }
 
             if (cmd == 1) {
@@ -90,7 +91,6 @@ void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write) {
         struct block *b = malloc(sizeof(struct block));
         b->size = j;
         b->buf = to_write;
-
         llist_add_tail(l, b);
     }
     *execution_graph = g;

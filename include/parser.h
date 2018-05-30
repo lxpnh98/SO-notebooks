@@ -12,6 +12,7 @@ struct block {
 struct cmd {
     LLIST args;
     int input_from;
+    int output_to;
 };
 
 void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write);

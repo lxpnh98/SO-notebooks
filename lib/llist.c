@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "llist.h"
+#include "parser.h"
 
 struct llist {
     struct node *head;
@@ -80,6 +81,16 @@ void **llist_to_array(LLIST l) {
     return a;
 }
 
+void llist_insert_at(LLIST l, void *d, int index) {
+    for (int i = 0; i < index; ++i) {
+        llist_next(l);
+    }
+    struct node *new_node = malloc(sizeof(struct node));
+    new_node->data = d;
+    new_node->next = l->head;
+    l->head = new_node;
+}
+
 int llist_length(LLIST l) {
     int length = 0;
     struct node *h;
@@ -104,4 +115,3 @@ void llist_free(LLIST l, void (*f)(void *)) {
     llist_node_free(l->head, f);
     free(l);
 }
-
