@@ -1,8 +1,12 @@
 Aceitar input do utilizador
 $ cat
+
 Listagem da diretoria atual
 $ ls
+
 O número de ficheiros na listagem
 $ | wc -l
+
 O nome do primeiro elemento
 $ 2 | head -1
+

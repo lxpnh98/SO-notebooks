@@ -54,9 +54,9 @@ void write_outputs(GRAPH g, LLIST l) {
         }
         b = (struct block *)llist_get_data_at(l, index);
         strcpy(buf_maior, b->buf);
-        memcpy(buf_maior + b->size,"<<<\n", 4);
+        memcpy(buf_maior + b->size,"<<<", 3);
         b->buf = mystrdup(buf_maior);
-        b->size += 4;
+        b->size += 3;
         close(fd);
     }
 }
