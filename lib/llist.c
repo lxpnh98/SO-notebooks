@@ -55,6 +55,16 @@ void *llist_get_data(LLIST l) {
     return (l->head ? l->head->data : NULL);
 }
 
+void *llist_get_data_at(LLIST l, int index) {
+    assert(l);
+    struct node *n = l->head;
+    for (int i = 0; i < index; ++i) {
+        assert(n->next);
+        n = n->next;
+    }
+    return n->data;
+}
+
 void llist_next(LLIST l) {
     assert(l);
     assert(l->head);

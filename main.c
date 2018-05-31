@@ -25,23 +25,38 @@ void write_outputs(GRAPH g, LLIST l) {
     char buf[1024];
     char buf_maior[1032];
     int index;
+    int first;
+    struct block *b;
 
     for(int i = 0; i < tam; i++) {
+        first = 1;
         fprintf(stderr, "Output %d:\n", i);
         sprintf(path, "o%d", i);
         fd = open(path, O_RDONLY);
         struct cmd *cmd = ((struct cmd *)graph_get_data(g, i));
         index = cmd->output_to;
-        while ((nbytes = read(fd, buf, 1024)) > 0) {
+        while ((nbytes = read(fd, buf, 1023)) > 0) {
             write(2, buf, nbytes);
-            sprintf(buf_maior,">>>\n%s",buf);
-            struct block *b = malloc(sizeof(struct block));
-            b->size = (nbytes+4);
-            b->buf = mystrdup(buf_maior);
+            if (first) {
+                sprintf(buf_maior,">>>\n%s",buf);
+            }
+            b = malloc(sizeof(struct block));
+            if (first) {
+                b->buf = mystrdup(buf_maior);
+                b->size = nbytes + 4;
+            } else {
+                b->buf = mystrdup(buf);
+                b->size = nbytes;
+            }
             llist_insert_at(l, b, index);
             index++;
+            first = 0;
         }
-        sprintf(buf_maior,"%s<<<\n", buf_maior);
+        b = (struct block *)llist_get_data_at(l, index);
+        strcpy(buf_maior, b->buf);
+        memcpy(buf_maior + b->size,"<<<\n", 4);
+        b->buf = mystrdup(buf_maior);
+        b->size += 4;
         close(fd);
     }
 }
