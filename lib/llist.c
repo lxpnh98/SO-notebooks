@@ -82,15 +82,15 @@ void **llist_to_array(LLIST l) {
 }
 
 void llist_insert_at(LLIST l, void *d, int index) {
-    LLIST aux = l;
-
+    struct node *n = l->head;
     for (int i = 0; i < index; ++i) {
-        aux->head = aux->head->next;
+        assert(n->next);
+        n = n->next;
     }
     struct node *new_node = malloc(sizeof(struct node));
     new_node->data = d;
-    new_node->next = aux->head;
-    aux->head = new_node;
+    new_node->next = n->next;
+    n->next = new_node;
 }
 
 int llist_length(LLIST l) {

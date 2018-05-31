@@ -33,7 +33,11 @@ void write_outputs(GRAPH g, LLIST l) {
         index = cmd->output_to;
         while ((nbytes = read(fd, buf, 1024)) > 0) {
             write(2, buf, nbytes);
-            llist_insert_at(l, buf, index);
+            struct block *b = malloc(sizeof(struct block));
+            b->size = nbytes;
+            b->buf = mystrdup(buf);
+            llist_insert_at(l, b, index);
+            index++;
         }
         close(fd);
     }

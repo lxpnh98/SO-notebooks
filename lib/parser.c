@@ -22,6 +22,7 @@ void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write) {
     int nbytes;
     char file_buf[BUF_SIZE];
     char *to_write;
+    int nblocks = -1;
 
     // output
     int output = 0;
@@ -43,6 +44,7 @@ void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write) {
                     if (++begin_output_marks == 3) {
                         output = 1;
                         // adicionar bloco e preparar seguinte
+                        nblocks++;
                         j -= 2; // apagar marcas anteriores
                         struct block *b = malloc(sizeof(struct block));
                         b->size = j;
@@ -75,12 +77,20 @@ void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write) {
             if (cmd == 1 && file_buf[i] == '\n') {
                 cmd = 0;
                 cmd_buf[k] = '\0';
-                // cortar string principal, adicionar nodo de conteúdo NULL
+                // adicionar bloco e preparar seguinte
+                nblocks++;
+                struct block *b = malloc(sizeof(struct block));
+                b->size = j;
+                b->buf = to_write;
+                llist_add_tail(l, b);
+                to_write = malloc(sizeof(char *) * nbytes);
+                j = 0;
                 // fazer parsing do comando
                 struct cmd *comando = malloc(sizeof(struct cmd));
                 parse_cmd(cmd_buf, comando);
                 add_cmd_to_graph(g, comando);
-                comando->output_to = llist_length(l);
+                comando->output_to = nblocks;
+                nblocks++;
             }
 
             if (cmd == 1) {
@@ -88,6 +98,7 @@ void parse_file(int fd, GRAPH *execution_graph, LLIST *buf_to_write) {
             }
         }
 
+        nblocks++;
         struct block *b = malloc(sizeof(struct block));
         b->size = j;
         b->buf = to_write;
