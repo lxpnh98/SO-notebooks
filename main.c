@@ -23,6 +23,7 @@ void write_outputs(GRAPH g, LLIST l) {
     int fd;
     int nbytes;
     char buf[1024];
+    char buf_maior[1032];
     int index;
 
     for(int i = 0; i < tam; i++) {
@@ -33,12 +34,14 @@ void write_outputs(GRAPH g, LLIST l) {
         index = cmd->output_to;
         while ((nbytes = read(fd, buf, 1024)) > 0) {
             write(2, buf, nbytes);
+            sprintf(buf_maior,">>>\n%s",buf);
             struct block *b = malloc(sizeof(struct block));
-            b->size = nbytes;
-            b->buf = mystrdup(buf);
+            b->size = (nbytes+4);
+            b->buf = mystrdup(buf_maior);
             llist_insert_at(l, b, index);
             index++;
         }
+        sprintf(buf_maior,"%s<<<\n", buf_maior);
         close(fd);
     }
 }
