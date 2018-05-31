@@ -17,6 +17,8 @@ void llist_next(LLIST l);
 
 void **llist_to_array(LLIST l);
 
+void llist_insert_at(LLIST l, void *d, int index);
+
 int llist_length(LLIST l);
 
 LLIST llist_clone(LLIST l);

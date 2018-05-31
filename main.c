@@ -17,18 +17,23 @@ void make_output_fifos(GRAPH g);
 void execute_graph(GRAPH g);
 void write_to_file(LLIST l, int fd);
 
-void print_outputs(GRAPH g) {
+void write_outputs(GRAPH g, LLIST l) {
     int tam = graph_get_nnodes(g);
     char path[10];
     int fd;
     int nbytes;
     char buf[1024];
+    int index;
+
     for(int i = 0; i < tam; i++) {
         fprintf(stderr, "Output %d:\n", i);
         sprintf(path, "o%d", i);
         fd = open(path, O_RDONLY);
+        struct cmd *cmd = ((struct cmd *)graph_get_data(g, i));
+        index = cmd->output_to;
         while ((nbytes = read(fd, buf, 1024)) > 0) {
             write(2, buf, nbytes);
+            llist_insert_at(l, buf, index);
         }
         close(fd);
     }
@@ -52,7 +57,7 @@ int main(int argc, char *argv[]) {
     make_input_fifos(g);
     make_output_fifos(g);
     execute_graph(g);
-    print_outputs(g);
+    write_outputs(g, l);
     sprintf(output_path, "%s_o", argv[1]);
     int output_fd = open(output_path, O_CREAT | O_WRONLY, 0644);
     write_to_file(l, output_fd);
