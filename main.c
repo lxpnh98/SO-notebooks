@@ -16,53 +16,9 @@ void make_input_fifos(GRAPH g);
 void make_output_fifos(GRAPH g);
 void execute_graph(GRAPH g);
 void write_to_file(LLIST l, int fd);
-
-void write_outputs(GRAPH g, LLIST l) {
-    int tam = graph_get_nnodes(g);
-    char path[10];
-    int fd;
-    int nbytes;
-    char buf[1024];
-    char buf_maior[1032];
-    int index;
-    int first;
-    struct block *b;
-
-    for(int i = 0; i < tam; i++) {
-        first = 1;
-        fprintf(stderr, "Output %d:\n", i);
-        sprintf(path, "o%d", i);
-        fd = open(path, O_RDONLY);
-        struct cmd *cmd = ((struct cmd *)graph_get_data(g, i));
-        index = cmd->output_to;
-        while ((nbytes = read(fd, buf, 1023)) > 0) {
-            write(2, buf, nbytes);
-            if (first) {
-                sprintf(buf_maior,">>>\n%s",buf);
-            }
-            b = malloc(sizeof(struct block));
-            if (first) {
-                b->buf = mystrdup(buf_maior);
-                b->size = nbytes + 4;
-            } else {
-                b->buf = mystrdup(buf);
-                b->size = nbytes;
-            }
-            llist_insert_at(l, b, index);
-            index++;
-            first = 0;
-        }
-        b = (struct block *)llist_get_data_at(l, index);
-        strcpy(buf_maior, b->buf);
-        memcpy(buf_maior + b->size,"<<<", 3);
-        b->buf = mystrdup(buf_maior);
-        b->size += 3;
-        close(fd);
-    }
-}
+void write_outputs(GRAPH g, LLIST l);
 
 int main(int argc, char *argv[]) {
-    char output_path[64];
     if (argc < 2) {
         char e[] = "Missing argument.";
         write(2, argv[0], strlen(argv[0]));
@@ -73,20 +29,27 @@ int main(int argc, char *argv[]) {
     }
     LLIST l;
     GRAPH g;
-    int fd = open(argv[1], O_RDONLY);
 
+    // ler e fazer parse
+    int fd = open(argv[1], O_RDONLY);
     parse_file(fd, &g, &l);
+    close(fd);
+
+    // processar e preparar para escrever
     make_input_fifos(g);
     make_output_fifos(g);
     execute_graph(g);
     write_outputs(g, l);
-    sprintf(output_path, "%s_o", argv[1]);
-    int output_fd = open(output_path, O_CREAT | O_WRONLY, 0644);
-    write_to_file(l, output_fd);
+
+    // escrever
+    fd = open(argv[1], O_WRONLY);
+    write_to_file(l, fd);
+    close(fd);
 
     exit(0);
 }
 
+// criar fifos de input nos processos cujo comando usa um pipe
 void make_input_fifos(GRAPH g) {
     int tam = graph_get_nnodes(g);
     char path[10];
@@ -99,6 +62,7 @@ void make_input_fifos(GRAPH g) {
     }
 }
 
+// criar fifos de output para todos os processos
 void make_output_fifos(GRAPH g) {
     int tam = graph_get_nnodes(g);
     char path[10];
@@ -117,12 +81,22 @@ void execute_graph(GRAPH g) {
     char path[10];
     int input_fd;
     int output_pipe[2];
+    int wait_stdin_pid = -1;
 
     for(int i = 0; i < tam; i++) {
 
         // redirecionar output e distribuir
         pipe(output_pipe);
         execute_distribuidor(g, i, output_pipe);
+
+        // se programa aceitar input do stdin, esperar que programa anterior
+        // que também aceita input do stdin acabe
+        if (((struct cmd *)graph_get_data(g, i))->input_from > 0) {
+            if (wait_stdin_pid != -1) {
+                waitpid(wait_stdin_pid, NULL, 0);
+            }
+            wait_stdin_pid = i;
+        }
 
         // executar comando
         if((pid = fork()) == 0) {
@@ -142,9 +116,6 @@ void execute_graph(GRAPH g) {
             execvp(argv[0], argv);
             exit(1); // em caso de erro
         } else {
-            if (((struct cmd *)graph_get_data(g, i))->input_from > 0) {
-                wait(NULL); // se o programa que dá o input acabar primeiro que o que recebe, não funciona (hangs ao abrir o fifo para escrever (*) )
-            }
             close(output_pipe[1]);
         }
     }
@@ -184,6 +155,53 @@ void execute_distribuidor(GRAPH g, int i, int pipe[]) {
     }
 }
 
+// escrever outputs do processos para a lista ligada contendo
+// o conteúdo do ficheiro final
+void write_outputs(GRAPH g, LLIST l) {
+    int tam = graph_get_nnodes(g);
+    char path[10];
+    int fd;
+    int nbytes;
+    char buf[1024];
+    char buf_maior[1032];
+    int index;
+    int first;
+    struct block *b;
+
+    for(int i = 0; i < tam; i++) {
+        first = 1;
+        fprintf(stderr, "Output %d:\n", i);
+        sprintf(path, "o%d", i);
+        fd = open(path, O_RDONLY);
+        struct cmd *cmd = ((struct cmd *)graph_get_data(g, i));
+        index = cmd->output_to;
+        while ((nbytes = read(fd, buf, 1023)) > 0) {
+            write(2, buf, nbytes);
+            b = malloc(sizeof(struct block));
+            // adicionar marcas de começo de output ao primeiro bloco
+            if (first) {
+                sprintf(buf_maior,">>>\n%s",buf);
+                b->buf = mystrdup(buf_maior);
+                b->size = nbytes + 4;
+            } else {
+                b->buf = mystrdup(buf);
+                b->size = nbytes;
+            }
+            llist_insert_at(l, b, index);
+            index++; // adicionar próximo bloco à frente do inserido
+            first = 0;
+        }
+        // adicionar marcas de termino de output ao último bloco
+        b = (struct block *)llist_get_data_at(l, index);
+        strcpy(buf_maior, b->buf);
+        memcpy(buf_maior + b->size,"<<<", 3);
+        b->buf = mystrdup(buf_maior);
+        b->size += 3;
+        close(fd);
+    }
+}
+
+// escrever output para ficheiro
 void write_to_file(LLIST l, int fd) {
     struct block *b;
     LLIST x = llist_clone(l);

@@ -1,6 +1,3 @@
-Aceitar input do utilizador
-$ cat
-
 Listagem da diretoria atual
 $ ls
 
@@ -9,4 +6,7 @@ $ | wc -l
 
 O nome do primeiro elemento
 $ 2 | head -1
+
+Aceitar input do utilizador
+$ cat
 
