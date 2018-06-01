@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-PROGNAME=notebooks
+PROGNAME=notebook
 CC=gcc
 CFLAGS=-Wall -Wextra -pedantic -std=c11 -ggdb
 # disable asserts
