@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-PROGNAME=main
+PROGNAME=notebooks
 CC=gcc
 CFLAGS=-Wall -Wextra -pedantic -std=c11 -ggdb
 # disable asserts
@@ -22,4 +22,4 @@ test/bin/%: test/%.c $(patsubst lib/%.c, obj/%.o, $(wildcard lib/*.c))
 .PHONY: clean
 
 clean:
-	rm main distribuidor i* o* test/bin/* obj/*.o 2> /dev/null || true # ignorar erros
+	rm $(PROGNAME) distribuidor i* o* test/bin/* obj/*.o 2> /dev/null || true # ignorar erros
