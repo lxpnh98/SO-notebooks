@@ -26,7 +26,7 @@
 
 \tab Para resolver o problema que nos foi apresentado começamos por fazer o parsing do ficheiro. O parsing excluí o output dos comandos e constroi o grafo de execução. Num grafo de execução os nodos correspondem a comandos e as arestas são os redicionamentos dos comandos. Se um nodo A do grafo tem uma aresta vinda de um nodo B significa que o output de B será redirecionado como o input de A, se o nodo for isolado ou não tiver arestas vindas de outros nodos significa que o comando recebe o input do standard input. Já o que é para escrever no ficheiro final é mantido em memória central com recurso a uma lista ligada de strings.
 
-Depois do parsing passamos para a execução dos comandos. Cada comando cria um pipe que é usado para distribuir o output do comando. A distribuição é feita através do programa distribuidor que lê do pipe e escreve nos fifos onde o output é necessário.
+Depois do parsing passamos para a execução dos comandos. São criados pipes para que os processos possam distribuir o seu output. A distribuição é feita através do programa distribuidor que lê do pipe e escreve nos fifos onde o output é necessário.
 
 No final da execução de cada comando os outputs são colocados na lista ligada de strings, (cada comando tem um índice que indica qual a posição onde deve ser adicionado na lista ligada) que está em memória central, para serem escritos em ficheiro.
 \chapter{Exemplo}
