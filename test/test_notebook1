@@ -1,12 +1,36 @@
 Listagem da diretoria atual
 $ ls
-
+>>>
+distribuidor
+distribuidor.c
+i1
+i2
+include
+lib
+main.c
+Makefile
+notebook
+o0
+o1
+o2
+o3
+obj
+README.md
+relatorio
+test
+<<<
 O número de ficheiros na listagem
 $ | wc -l
-
+>>>
+17
+<<<
 O nome do primeiro elemento
 $ 2 | head -1
-
+>>>
+distribuidor
+<<<
 Aceitar input do utilizador
 $ cat
-
+>>>
+Hello, world!
+<<<
