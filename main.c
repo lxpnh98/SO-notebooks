@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     write_outputs(g, l);
 
     // escrever
-    fd = open(argv[1], O_WRONLY);
+    fd = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
     write_to_file(l, fd);
     close(fd);
 
